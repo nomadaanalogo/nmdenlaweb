@@ -1,0 +1,539 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-sans: "Inter", sans-serif;
+
+  --color-ink: #050506;
+  --color-surface: #0c0c0f;
+  --color-surface-2: #131318;
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-muted: #93939c;
+  --color-neon: #b954ff;
+  --color-neon-2: #ff4ecd;
+  --color-neon-soft: rgba(185, 84, 255, 0.35);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background: var(--color-ink);
+  }
+
+  body {
+    background-color: var(--color-ink);
+    color: #f2f2f4;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: var(--color-neon);
+    color: #050506;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Fixed full-screen slides, enabled by ScrollEffects.astro on desktop / fine pointers only. */
+  html.slides-mode,
+  html.slides-mode body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  html.slides-mode .slide {
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  html.slides-mode .slide::-webkit-scrollbar {
+    display: none;
+  }
+
+  #slides-track {
+    transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .section-scroll-offset {
+    scroll-margin-top: 6rem;
+  }
+
+  .slide {
+    position: relative;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-gradient {
+    background-image: linear-gradient(90deg, var(--color-neon), var(--color-neon-2));
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .icon-neon {
+    color: var(--color-neon);
+    filter: drop-shadow(0 0 6px var(--color-neon-soft))
+      drop-shadow(0 0 14px rgba(185, 84, 255, 0.18));
+  }
+
+  .neon-ring {
+    box-shadow:
+      0 0 0 1px rgba(185, 84, 255, 0.3),
+      0 0 24px rgba(185, 84, 255, 0.14);
+  }
+
+  .bg-grid {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  /* Chip del hero: borde degradado que gira, check y mini gráfica de crecimiento. */
+  .hero-chip {
+    --chip-angle: 0deg;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.3rem 0.85rem 0.3rem 0.3rem;
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    background:
+      linear-gradient(#120c1a, #120c1a) padding-box,
+      conic-gradient(
+          from var(--chip-angle),
+          rgba(185, 84, 255, 0.15),
+          var(--color-neon),
+          var(--color-neon-2),
+          rgba(185, 84, 255, 0.15) 60%
+        )
+        border-box;
+    box-shadow: 0 0 30px -6px var(--color-neon-soft);
+    font-size: 0.8125rem;
+    color: #c9c9d1;
+    animation:
+      fade-up-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both,
+      chip-spin 4s linear infinite;
+  }
+
+  @keyframes chip-spin {
+    to {
+      --chip-angle: 360deg;
+    }
+  }
+
+  .hero-chip-check {
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 9999px;
+    background-image: linear-gradient(135deg, var(--color-neon), var(--color-neon-2));
+    color: #fff;
+    stroke-width: 3;
+  }
+
+  .hero-chip-check svg {
+    stroke-width: 3;
+  }
+
+  .hero-chip-wifi {
+    display: grid;
+    place-items: center;
+    padding-left: 0.6rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .hero-chip-wifi svg {
+    width: 1.05rem;
+    height: 1.05rem;
+    filter: drop-shadow(0 0 4px var(--color-neon-soft));
+  }
+
+  /* Las ondas se encienden de adentro hacia afuera, como señal conectando. */
+  .hero-chip-wifi path {
+    animation: wifi-wave 2.4s ease-in-out infinite;
+  }
+
+  .hero-chip-wifi path:nth-of-type(3) { animation-delay: 0s; }
+  .hero-chip-wifi path:nth-of-type(2) { animation-delay: 0.25s; }
+  .hero-chip-wifi path:nth-of-type(1) { animation-delay: 0.5s; }
+
+  @keyframes wifi-wave {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    40% {
+      opacity: 0.2;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .hero-chip {
+      gap: 0.75rem;
+      padding: 0.35rem 1rem 0.35rem 0.35rem;
+      font-size: 0.9375rem;
+    }
+
+    .hero-chip-check {
+      width: 1.75rem;
+      height: 1.75rem;
+    }
+
+    .hero-chip-wifi {
+      padding-left: 0.75rem;
+    }
+
+    .hero-chip-wifi svg {
+      width: 1.2rem;
+      height: 1.2rem;
+    }
+  }
+
+  .benefit-tile {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.875rem;
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(var(--color-surface-2), var(--color-surface-2)) padding-box,
+      linear-gradient(140deg, var(--color-neon), rgba(255, 78, 205, 0.15) 60%, transparent) border-box;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+
+  .group:hover .benefit-tile {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 50px -12px var(--color-neon-soft);
+  }
+
+  .diag-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+    border: 1px solid #ece6f5;
+    background: #faf8fd;
+    cursor: pointer;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .diag-option:hover {
+    border-color: rgba(185, 84, 255, 0.5);
+    transform: translateY(-2px);
+    background: #fff;
+  }
+
+  .diag-option:has(input:focus-visible) {
+    outline: 2px solid var(--color-neon);
+    outline-offset: 3px;
+  }
+
+  .diag-option:has(input:checked) {
+    border-color: var(--color-neon);
+    background: #f6efff;
+    box-shadow: 0 0 0 1px var(--color-neon), 0 12px 32px -14px var(--color-neon-soft);
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    background-image: linear-gradient(90deg, var(--color-neon), var(--color-neon-2));
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #fff;
+    box-shadow: 0 10px 32px -8px rgba(185, 84, 255, 0.7);
+    transition: transform 0.2s ease;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.6;
+  }
+
+  .btn-primary svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  @media (min-width: 768px) {
+    .btn-primary {
+      gap: 0.625rem;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+    }
+
+    .btn-primary svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+
+  /* Círculo tipo radio a la derecha de cada opción: indica que se puede elegir. */
+  .diag-radio {
+    flex-shrink: 0;
+    width: 1.375rem;
+    height: 1.375rem;
+    border-radius: 9999px;
+    border: 2px solid #d6cce4;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease;
+  }
+
+  .diag-option:hover .diag-radio {
+    border-color: var(--color-neon);
+  }
+
+  .diag-option:has(input:checked) .diag-radio {
+    border-color: var(--color-neon);
+    background: var(--color-neon);
+    box-shadow:
+      inset 0 0 0 3px #f6efff,
+      0 0 12px var(--color-neon-soft);
+  }
+
+  .diag-hint-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--color-neon);
+    animation: hint-pulse 1.6s ease-in-out infinite;
+  }
+
+  @keyframes hint-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(185, 84, 255, 0.6);
+    }
+    50% {
+      box-shadow: 0 0 0 6px rgba(185, 84, 255, 0);
+    }
+  }
+
+  .diag-option-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 1rem;
+    background: rgba(185, 84, 255, 0.1);
+    border: 1px solid rgba(185, 84, 255, 0.3);
+  }
+
+  .diag-input {
+    width: 100%;
+    border-radius: 0.875rem;
+    border: 1px solid #e4dcef;
+    background: #faf8fd;
+    padding: 0.9rem 1rem;
+    color: #050506;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+  }
+
+  .diag-input::placeholder {
+    color: #a19cab;
+  }
+
+  .diag-input:focus {
+    outline: none;
+    background: #fff;
+    border-color: var(--color-neon);
+    box-shadow: 0 0 0 3px rgba(185, 84, 255, 0.2);
+  }
+
+  /* Formulario más compacto en celular. */
+  @media (max-width: 767px) {
+    .diag-option {
+      gap: 0.75rem;
+      padding: 0.75rem 0.875rem;
+      border-radius: 1rem;
+    }
+
+    .diag-option-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.75rem;
+    }
+
+    .diag-radio {
+      width: 1.125rem;
+      height: 1.125rem;
+    }
+
+    .diag-input {
+      padding: 0.7rem 0.875rem;
+      border-radius: 0.75rem;
+    }
+  }
+
+  .diag-step {
+    animation: fade-up-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .project-card {
+    display: block;
+    overflow: hidden;
+    border-radius: 1.25rem;
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+    transition:
+      border-color 0.3s ease,
+      box-shadow 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  .project-card:hover {
+    border-color: rgba(185, 84, 255, 0.45);
+    transform: translateY(-4px);
+    box-shadow: 0 24px 60px -20px var(--color-neon-soft);
+  }
+
+  .glow-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(90px);
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .nav-link {
+    position: relative;
+  }
+
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -0.35rem;
+    height: 1px;
+    width: 0%;
+    background: var(--color-neon);
+    transition: width 0.3s ease;
+  }
+
+  .nav-link:hover::after {
+    width: 100%;
+  }
+
+  @keyframes fade-up-in {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-up {
+    animation: fade-up-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .has-js .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .has-js .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-delay-1 {
+    transition-delay: 90ms;
+  }
+  .reveal-delay-2 {
+    transition-delay: 180ms;
+  }
+  .reveal-delay-3 {
+    transition-delay: 270ms;
+  }
+  .reveal-delay-4 {
+    transition-delay: 360ms;
+  }
+
+  .slide-dots {
+    position: fixed;
+    right: 1.75rem;
+    top: 50%;
+    z-index: 40;
+    display: none;
+    transform: translateY(-50%);
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  html.slides-mode .slide-dots {
+    display: flex;
+  }
+
+  .slide-dot {
+    height: 0.5rem;
+    width: 0.5rem;
+    cursor: pointer;
+    border: none;
+    border-radius: 9999px;
+    background: rgba(147, 147, 156, 0.55);
+    padding: 0;
+    transition:
+      transform 0.3s ease,
+      background 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+
+  .slide-dot.is-active {
+    background: var(--color-neon);
+    transform: scale(1.5);
+    box-shadow: 0 0 12px var(--color-neon-soft);
+  }
+}
+
+/* Permite animar el ángulo del borde degradado del chip del hero. */
+@property --chip-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}

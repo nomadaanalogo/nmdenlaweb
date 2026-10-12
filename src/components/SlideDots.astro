@@ -1,0 +1,15 @@
+---
+interface Props {
+  slides: { id: string; label: string }[];
+}
+
+const { slides } = Astro.props;
+---
+
+<nav class="slide-dots" aria-label="Navegación de secciones">
+  {
+    slides.map((slide) => (
+      <button type="button" class="slide-dot" data-target={slide.id} aria-label={slide.label} />
+    ))
+  }
+</nav>

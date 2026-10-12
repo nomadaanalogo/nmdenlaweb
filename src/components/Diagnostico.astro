@@ -1,0 +1,287 @@
+---
+import Icon from "./Icon.astro";
+import { FORM_ENDPOINT, WHATSAPP_NUMBER } from "../config";
+
+const QUESTIONS = [
+  {
+    name: "web",
+    title: "¿Tienes página web?",
+    options: [
+      { value: "Sí, pero está desactualizada y no trae clientes", label: "Sí, pero no me trae clientes", icon: "browser" as const },
+      { value: "No tengo página web", label: "No, no tengo", icon: "circleX" as const },
+    ],
+  },
+  {
+    name: "maps",
+    title: "¿Tienes perfil en Google Maps?",
+    options: [
+      { value: "Sí, pero no estoy posicionado", label: "Sí, pero no aparezco arriba", icon: "mapPin" as const },
+      { value: "No tengo perfil en Google Maps", label: "No, no tengo", icon: "circleX" as const },
+    ],
+  },
+  {
+    name: "local",
+    title: "¿Tu negocio tiene local físico o es virtual?",
+    options: [
+      { value: "Local físico", label: "Local físico", icon: "store" as const },
+      { value: "Virtual", label: "Virtual", icon: "globe" as const },
+      { value: "Ambas: local físico y virtual", label: "Ambas", icon: "devices" as const },
+    ],
+  },
+];
+
+// Preguntas de opción + "Háblanos de tu negocio" + datos de contacto.
+const TOTAL = QUESTIONS.length + 2;
+---
+
+<section
+  id="diagnostico"
+  class="slide section-scroll-offset relative flex flex-col overflow-x-clip bg-white text-ink md:min-h-screen"
+>
+  <div
+    class="glow-blob left-1/2 top-1/2 h-96 w-160 -translate-x-1/2 -translate-y-1/2 bg-neon/10"
+    data-parallax="0.08"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div class="relative mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-4 pt-20 pb-10 sm:px-6 md:px-10 md:pt-28 md:pb-16">
+    <div class="reveal mb-5 text-center md:mb-10">
+      <h2 class="font-display text-balance text-2xl font-bold leading-tight tracking-tight text-ink sm:text-4xl md:text-5xl">
+        Cuéntanos de tu negocio y te enviamos <span class="text-gradient">tu propuesta.</span>
+      </h2>
+    </div>
+
+    <form
+      id="diag-form"
+      class="reveal reveal-delay-1 rounded-2xl border border-neon/15 bg-white p-4 shadow-[0_30px_80px_-30px_rgba(185,84,255,0.35)] sm:p-6 md:rounded-3xl md:p-10"
+      data-endpoint={FORM_ENDPOINT}
+      data-whatsapp={WHATSAPP_NUMBER}
+      novalidate
+    >
+      <div class="mb-5 flex items-center gap-3 md:mb-8 md:gap-4" data-progress-wrap>
+        <div class="h-1 flex-1 overflow-hidden rounded-full bg-neon/10 md:h-1.5">
+          <div data-progress class="h-full rounded-full bg-linear-to-r from-neon to-neon-2 transition-[width] duration-500" style={`width: ${100 / TOTAL}%`}></div>
+        </div>
+        <span data-counter class="text-xs tabular-nums text-zinc-500 md:text-sm">1 de {TOTAL}</span>
+      </div>
+
+      {
+        QUESTIONS.map((q, i) => (
+          <fieldset data-step={i} hidden={i !== 0} class="diag-step">
+            <legend class="font-display mb-1.5 text-lg font-semibold leading-snug text-ink sm:text-2xl md:mb-2 md:text-3xl">{q.title}</legend>
+            <p class="mb-4 flex items-center gap-2 text-xs text-zinc-500 md:mb-6 md:text-sm">
+              <span class="diag-hint-dot" aria-hidden="true" />
+              Toca una opción para continuar
+            </p>
+            <div class:list={["grid gap-2.5 md:gap-4", q.options.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"]}>
+              {q.options.map((opt) => (
+                <label class="diag-option">
+                  <input type="radio" name={q.name} value={opt.value} class="sr-only" required />
+                  <span class="diag-option-icon">
+                    <Icon name={opt.icon} class="icon-neon h-5 w-5 md:h-8 md:w-8" />
+                  </span>
+                  <span class="font-display flex-1 text-[0.9375rem] font-semibold leading-snug text-ink md:text-lg">{opt.label}</span>
+                  <span class="diag-radio" aria-hidden="true" />
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        ))
+      }
+
+      <fieldset data-step={QUESTIONS.length} hidden class="diag-step">
+        <legend class="font-display mb-1.5 text-lg font-semibold leading-snug text-ink sm:text-2xl md:mb-2 md:text-3xl">
+          Háblanos de tu negocio
+        </legend>
+        <p class="mb-4 text-sm text-zinc-500 md:mb-6 md:text-base">Unas líneas bastan para conocerte mejor.</p>
+        <div class="grid gap-3 md:gap-4">
+          <label class="grid gap-1.5">
+            <span class="sr-only">Sobre tu negocio</span>
+            <textarea
+              id="diag-negocio"
+              name="negocio"
+              rows="4"
+              required
+              class="diag-input resize-none"
+              placeholder="¿Qué vendes? ¿Cómo lo vendes: tienda, domicilios, redes, WhatsApp? ¿Quiénes son tus clientes?"
+            ></textarea>
+          </label>
+          <p data-negocio-error class="hidden text-sm text-neon-2" role="alert">Cuéntanos al menos qué vendes.</p>
+          <button
+            type="button"
+            data-next
+            class="btn-primary mt-1"
+          >
+            Siguiente
+            <Icon name="arrowRight" />
+          </button>
+        </div>
+      </fieldset>
+
+      <fieldset data-step={QUESTIONS.length + 1} hidden class="diag-step">
+        <legend class="font-display mb-1.5 text-lg font-semibold leading-snug text-ink sm:text-2xl md:mb-2 md:text-3xl">
+          Déjanos tus datos
+        </legend>
+        <p class="mb-4 text-sm text-zinc-500 md:mb-6 md:text-base">Te enviamos la propuesta por WhatsApp y correo.</p>
+        <div class="grid gap-3 md:gap-4">
+          <label class="grid gap-1.5">
+            <span class="text-xs text-zinc-500 md:text-sm">Nombre</span>
+            <input id="diag-nombre" name="nombre" type="text" autocomplete="name" required class="diag-input" placeholder="Tu nombre" />
+          </label>
+          <div class="grid gap-3 sm:grid-cols-2 md:gap-4">
+            <label class="grid gap-1.5">
+              <span class="text-xs text-zinc-500 md:text-sm">WhatsApp</span>
+              <input id="diag-whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" required class="diag-input" placeholder="300 123 4567" />
+            </label>
+            <label class="grid gap-1.5">
+              <span class="text-xs text-zinc-500 md:text-sm">Correo</span>
+              <input id="diag-correo" name="correo" type="email" autocomplete="email" required class="diag-input" placeholder="tu@correo.com" />
+            </label>
+          </div>
+          <!-- Campo trampa: invisible para personas, los bots de spam lo llenan. -->
+          <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="hidden" />
+          <p data-error class="hidden text-sm text-neon-2" role="alert"></p>
+          <button
+            type="submit"
+            class="btn-primary mt-1"
+          >
+            Quiero mi propuesta
+            <Icon name="arrowRight" />
+          </button>
+        </div>
+      </fieldset>
+
+      <div data-done hidden class="flex flex-col items-center gap-4 py-4 text-center md:gap-5 md:py-6">
+        <span class="diag-option-icon h-20! w-20!">
+          <Icon name="check" class="icon-neon h-10 w-10" />
+        </span>
+        <h3 class="font-display text-2xl font-bold text-ink md:text-3xl">¡Listo!</h3>
+        <p class="max-w-sm text-zinc-500">Recibimos tus respuestas. Pronto te escribimos con tu propuesta.</p>
+      </div>
+
+      <button
+        type="button"
+        data-back
+        hidden
+        class="mt-4 inline-flex items-center gap-2 text-sm text-zinc-500 md:mt-8 transition-colors hover:text-neon"
+      >
+        <Icon name="arrowLeft" class="h-4 w-4" />
+        Atrás
+      </button>
+    </form>
+  </div>
+</section>
+
+<script>
+  const form = document.getElementById("diag-form") as HTMLFormElement | null;
+
+  if (form) {
+    const steps = Array.from(form.querySelectorAll<HTMLFieldSetElement>(".diag-step"));
+    const progress = form.querySelector<HTMLElement>("[data-progress]");
+    const progressWrap = form.querySelector<HTMLElement>("[data-progress-wrap]");
+    const counter = form.querySelector<HTMLElement>("[data-counter]");
+    const back = form.querySelector<HTMLButtonElement>("[data-back]");
+    const done = form.querySelector<HTMLElement>("[data-done]");
+    const error = form.querySelector<HTMLElement>("[data-error]");
+    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    let current = 0;
+
+    const show = (index: number) => {
+      current = index;
+      steps.forEach((step, i) => (step.hidden = i !== index));
+      if (progress) progress.style.width = `${((index + 1) / steps.length) * 100}%`;
+      if (counter) counter.textContent = `${index + 1} de ${steps.length}`;
+      if (back) back.hidden = index === 0;
+      steps[index]
+        .querySelector<HTMLElement>("input:checked, input, textarea")
+        ?.focus({ preventScroll: true });
+    };
+
+    const negocio = form.querySelector<HTMLTextAreaElement>("#diag-negocio");
+    const negocioError = form.querySelector<HTMLElement>("[data-negocio-error]");
+    form.querySelector("[data-next]")?.addEventListener("click", () => {
+      const ok = (negocio?.value.trim().length ?? 0) >= 3;
+      negocioError?.classList.toggle("hidden", ok);
+      if (ok) show(current + 1);
+      else negocio?.focus();
+    });
+
+    form.addEventListener("change", (e) => {
+      const target = e.target as HTMLInputElement;
+      if (target.type !== "radio") return;
+      window.setTimeout(() => show(Math.min(current + 1, steps.length - 1)), 250);
+    });
+
+    back?.addEventListener("click", () => show(Math.max(current - 1, 0)));
+
+    const showError = (msg: string) => {
+      if (!error) return;
+      error.textContent = msg;
+      error.classList.toggle("hidden", !msg);
+    };
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+      const nombre = String(data.get("nombre") ?? "").trim();
+      const whatsapp = String(data.get("whatsapp") ?? "").trim();
+      const correo = String(data.get("correo") ?? "").trim();
+
+      if (!nombre || whatsapp.replace(/\D/g, "").length < 7) {
+        showError("Escribe tu nombre y un número de WhatsApp válido.");
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+        showError("Revisa tu correo, parece que le falta algo.");
+        return;
+      }
+      showError("");
+
+      const answers = {
+        web: String(data.get("web") ?? ""),
+        maps: String(data.get("maps") ?? ""),
+        local: String(data.get("local") ?? ""),
+        negocio: String(data.get("negocio") ?? "").trim(),
+        nombre,
+        whatsapp,
+        correo,
+      };
+
+      const endpoint = form.dataset.endpoint;
+      if (submit) submit.disabled = true;
+
+      try {
+        if (endpoint) {
+          // text/plain evita el preflight CORS, que Google Apps Script no soporta.
+          const res = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ ...answers, website: String(data.get("website") ?? "") }),
+          });
+          const result = await res.json().catch(() => null);
+          if (!res.ok || !result?.ok) throw new Error(result?.error ?? "Envío fallido");
+        } else {
+          const text = [
+            `Hola nmdenlaweb, soy ${nombre}. Quiero mi propuesta.`,
+            `• Página web: ${answers.web}`,
+            `• Google Maps: ${answers.maps}`,
+            `• Tipo de negocio: ${answers.local}`,
+            `• Sobre mi negocio: ${answers.negocio}`,
+            `• WhatsApp: ${whatsapp}`,
+            `• Correo: ${correo}`,
+          ].join("\n");
+          window.open(`https://wa.me/${form.dataset.whatsapp}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+        }
+        steps.forEach((step) => (step.hidden = true));
+        if (progressWrap) progressWrap.hidden = true;
+        if (back) back.hidden = true;
+        if (done) done.hidden = false;
+      } catch {
+        showError("No pudimos enviar tus datos. Intenta de nuevo en un momento.");
+      } finally {
+        if (submit) submit.disabled = false;
+      }
+    });
+  }
+</script>

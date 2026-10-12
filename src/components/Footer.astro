@@ -1,0 +1,35 @@
+---
+import Icon from "./Icon.astro";
+
+// TODO: Reemplazar con los links reales de redes sociales.
+const SOCIALS = [
+  { icon: "instagram" as const, label: "Instagram", href: "https://instagram.com" },
+  { icon: "linkedin" as const, label: "LinkedIn", href: "https://linkedin.com" },
+];
+
+const year = new Date().getFullYear();
+---
+
+<footer class="relative shrink-0 border-t border-line py-6">
+  <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:px-6 md:flex-row md:px-10">
+    <p class="font-display text-sm text-muted">
+      nmd<span class="text-neon">enlaweb</span> © {year}
+    </p>
+
+    <div class="flex items-center gap-5">
+      {
+        SOCIALS.map((social) => (
+          <a
+            href={social.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={social.label}
+            class="text-muted transition-colors hover:text-neon"
+          >
+            <Icon name={social.icon} class="h-5 w-5" />
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,29 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
+import SlideDots from "../components/SlideDots.astro";
+import Hero from "../components/Hero.astro";
+import Diagnostico from "../components/Diagnostico.astro";
+import Portfolio from "../components/Portfolio.astro";
+import Contact from "../components/Contact.astro";
+import WhatsAppFloat from "../components/WhatsAppFloat.astro";
+
+const SLIDES = [
+  { id: "top", label: "Inicio" },
+  { id: "diagnostico", label: "Propuesta" },
+  { id: "portafolio", label: "Proyectos" },
+  { id: "contacto", label: "Contacto" },
+];
+---
+
+<Layout>
+  <Nav />
+  <SlideDots slides={SLIDES} />
+  <main id="slides-track">
+    <Hero />
+    <Diagnostico />
+    <Portfolio />
+    <Contact />
+  </main>
+  <WhatsAppFloat />
+</Layout>

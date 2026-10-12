@@ -1,0 +1,48 @@
+---
+import "../styles/global.css";
+import ScrollEffects from "../components/ScrollEffects.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "nmdenlaweb · Estudio de diseño web y marketing digital",
+  description = "Estudio de diseño web y marketing digital. Hacemos que tus clientes te encuentren más fácil: en las IAs, en Google y en Google Maps.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content="nmdenlaweb" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:site_name" content="nmdenlaweb" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-ink">
+    <slot />
+    <ScrollEffects />
+  </body>
+</html>

@@ -1,0 +1,167 @@
+---
+---
+
+<script>
+  document.documentElement.classList.add("has-js");
+
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------- Reveal on scroll (fallback path: mobile / no slides-mode) ----------
+  const revealEls = Array.from(document.querySelectorAll<HTMLElement>(".reveal"));
+  const revealObserver = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          if (!document.documentElement.classList.contains("slides-mode")) {
+            revealObserver.unobserve(entry.target);
+          }
+        }
+      }
+    },
+    { threshold: 0.15 },
+  );
+  revealEls.forEach((el) => revealObserver.observe(el));
+
+  function replaySlideReveal(slide: Element) {
+    const els = Array.from(slide.querySelectorAll<HTMLElement>(".reveal"));
+    els.forEach((el) => el.classList.remove("is-visible"));
+    // Force reflow so the CSS transition restarts from the hidden state.
+    void (slide as HTMLElement).offsetHeight;
+    requestAnimationFrame(() => {
+      els.forEach((el) => el.classList.add("is-visible"));
+    });
+  }
+
+  // ---------- Parallax (continuous loop: also reacts to the slide-track transform) ----------
+  const parallaxEls = Array.from(document.querySelectorAll<HTMLElement>("[data-parallax]"));
+
+  if (!prefersReducedMotion && parallaxEls.length) {
+    const tick = () => {
+      const vh = window.innerHeight;
+      parallaxEls.forEach((el) => {
+        const factor = parseFloat(el.dataset.parallax ?? "0.15");
+        const rect = el.getBoundingClientRect();
+        const center = rect.top + rect.height / 2;
+        const delta = (center - vh / 2) * factor;
+        el.style.transform = `translate3d(0, ${delta}px, 0)`;
+      });
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  // ---------- Fixed full-screen slides (desktop + fine pointer only) ----------
+  const track = document.getElementById("slides-track");
+
+  if (track && !prefersReducedMotion) {
+    const slides = Array.from(track.querySelectorAll<HTMLElement>(":scope > .slide"));
+    const dots = Array.from(document.querySelectorAll<HTMLButtonElement>(".slide-dot"));
+    const mq = window.matchMedia("(min-width: 768px) and (pointer: fine)");
+
+    let active = false;
+    let current = 0;
+    let cooling = false;
+    const TRANSITION_MS = 900;
+
+    const setTransform = (index: number, animate = true) => {
+      track.style.transition = animate ? "" : "none";
+      track.style.transform = `translate3d(0, -${index * 100}vh, 0)`;
+      if (!animate) {
+        void track.offsetHeight;
+        track.style.transition = "";
+      }
+    };
+
+    const updateDots = (index: number) => {
+      dots.forEach((dot, i) => dot.classList.toggle("is-active", i === index));
+    };
+
+    const goTo = (index: number) => {
+      index = Math.max(0, Math.min(slides.length - 1, index));
+      current = index;
+      setTransform(current);
+      updateDots(current);
+      replaySlideReveal(slides[current]);
+      history.replaceState(null, "", `#${slides[current].id}`);
+      cooling = true;
+      window.setTimeout(() => {
+        cooling = false;
+      }, TRANSITION_MS);
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      if (!active) return;
+      const slide = slides[current];
+      const goingDown = e.deltaY > 0;
+      const atTop = slide.scrollTop <= 0;
+      const atBottom = Math.ceil(slide.scrollTop + slide.clientHeight) >= slide.scrollHeight;
+
+      // Let the slide's own content scroll first if it doesn't fully fit the viewport.
+      if (goingDown && !atBottom) return;
+      if (!goingDown && !atTop) return;
+
+      e.preventDefault();
+      if (cooling || Math.abs(e.deltaY) < 4) return;
+      goTo(current + (goingDown ? 1 : -1));
+    };
+
+    const onKeydown = (e: KeyboardEvent) => {
+      if (!active) return;
+      // Don't hijack arrow keys inside form fields (radio groups, inputs).
+      if ((e.target as HTMLElement)?.closest?.("input, textarea, select")) return;
+      if (e.key === "ArrowDown" || e.key === "PageDown") {
+        e.preventDefault();
+        goTo(current + 1);
+      } else if (e.key === "ArrowUp" || e.key === "PageUp") {
+        e.preventDefault();
+        goTo(current - 1);
+      }
+    };
+
+    const onAnchorClick = (e: MouseEvent) => {
+      if (!active) return;
+      const anchor = (e.target as HTMLElement)?.closest?.('a[href^="#"]');
+      if (!anchor) return;
+      const id = anchor.getAttribute("href")?.slice(1);
+      const index = slides.findIndex((s) => s.id === id);
+      if (index === -1) return;
+      e.preventDefault();
+      goTo(index);
+    };
+
+    const enable = () => {
+      if (active) return;
+      active = true;
+      document.documentElement.classList.add("slides-mode");
+      const initialId = location.hash?.slice(1);
+      const initialIndex = slides.findIndex((s) => s.id === initialId);
+      current = initialIndex > -1 ? initialIndex : 0;
+      setTransform(current, false);
+      updateDots(current);
+      replaySlideReveal(slides[current]);
+    };
+
+    const disable = () => {
+      if (!active) return;
+      active = false;
+      document.documentElement.classList.remove("slides-mode");
+      track.style.transition = "none";
+      track.style.transform = "";
+      void track.offsetHeight;
+      track.style.transition = "";
+    };
+
+    const syncMode = () => (mq.matches ? enable() : disable());
+
+    syncMode();
+    mq.addEventListener("change", syncMode);
+    dots.forEach((dot, i) => dot.addEventListener("click", () => goTo(i)));
+    window.addEventListener("wheel", onWheel, { passive: false });
+    window.addEventListener("keydown", onKeydown);
+    document.addEventListener("click", onAnchorClick);
+    window.addEventListener("resize", () => {
+      if (active) setTransform(current, false);
+    });
+  }
+</script>
