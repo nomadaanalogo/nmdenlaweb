@@ -1,4 +1,6 @@
 export const STUDIO_NAME = "nmdenlaweb";
+// Dominio del sitio (sin "/" al final). Debe coincidir con `site` en astro.config.mjs.
+export const SITE_URL = "https://nmdenlaweb.com";
 export const EMAIL = "nmdenlaweb@gmail.com";
 // TODO: Número en formato internacional, sin "+" ni espacios (ej: 573001234567).
 export const WHATSAPP_NUMBER = "00000000000";

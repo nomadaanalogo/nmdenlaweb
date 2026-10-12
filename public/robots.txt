@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Buscadores de IA: permitidos para que puedan citar y recomendar el sitio.
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+Sitemap: https://nmdenlaweb.com/sitemap.xml

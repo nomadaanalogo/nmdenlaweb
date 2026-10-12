@@ -1,6 +1,8 @@
 ---
 import "../styles/global.css";
 import ScrollEffects from "../components/ScrollEffects.astro";
+import { EMAIL, SITE_URL, STUDIO_NAME, WHATSAPP_NUMBER } from "../config";
+import { COLOMBIA_CITIES, FAQ, SERVICES, USA_CITIES } from "../data/faq";
 
 interface Props {
   title?: string;
@@ -8,9 +10,85 @@ interface Props {
 }
 
 const {
-  title = "nmdenlaweb · Estudio de diseño web y marketing digital",
-  description = "Estudio de diseño web y marketing digital. Hacemos que tus clientes te encuentren más fácil: en las IAs, en Google y en Google Maps.",
+  title = "Diseño web y marketing digital en Colombia | nmdenlaweb",
+  description = "Estudio de diseño web y marketing digital. Páginas web rápidas, SEO, Google Maps y visibilidad en IAs para negocios en Colombia y negocios hispanos en EE. UU.",
 } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, SITE_URL).href;
+const ogImage = new URL("/og.png", SITE_URL).href;
+
+// Redes sociales oficiales del estudio (Instagram, LinkedIn, Facebook…). Ayudan a Google a confiar en la marca.
+const SAME_AS: string[] = [];
+const hasWhatsApp = !/^0+$/.test(WHATSAPP_NUMBER);
+
+const city = (name: string, country: string) => ({
+  "@type": "City",
+  name,
+  containedInPlace: { "@type": "Country", name: country },
+});
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ProfessionalService",
+      "@id": `${SITE_URL}/#organization`,
+      name: STUDIO_NAME,
+      url: SITE_URL,
+      email: EMAIL,
+      ...(hasWhatsApp && { telephone: `+${WHATSAPP_NUMBER}` }),
+      description,
+      slogan: "Hagamos que tus clientes te encuentren más fácil",
+      image: ogImage,
+      logo: new URL("/apple-touch-icon.png", SITE_URL).href,
+      priceRange: "$$",
+      knowsLanguage: "es",
+      areaServed: [
+        { "@type": "Country", name: "Colombia" },
+        { "@type": "Country", name: "Estados Unidos" },
+        ...COLOMBIA_CITIES.map((c) => city(c, "Colombia")),
+        ...USA_CITIES.map((c) => city(c, "Estados Unidos")),
+      ],
+      knowsAbout: [
+        "Diseño de páginas web",
+        "SEO",
+        "Posicionamiento en Google",
+        "Google Maps",
+        "Perfil de Empresa en Google",
+        "SEO local",
+        "Generative Engine Optimization (GEO)",
+        "Marketing digital",
+      ],
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name: "Servicios de diseño web y marketing digital",
+        itemListElement: SERVICES.map((s) => ({
+          "@type": "Offer",
+          itemOffered: { "@type": "Service", name: s.name, description: s.description },
+        })),
+      },
+      ...(SAME_AS.length && { sameAs: SAME_AS }),
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: STUDIO_NAME,
+      inLanguage: "es",
+      publisher: { "@id": `${SITE_URL}/#organization` },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": `${canonical}#preguntas`,
+      inLanguage: "es",
+      mainEntity: FAQ.map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: { "@type": "Answer", text: item.a },
+      })),
+    },
+  ],
+};
 ---
 
 <!doctype html>
@@ -18,21 +96,35 @@ const {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
 
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="author" content="nmdenlaweb" />
+    <meta name="author" content={STUDIO_NAME} />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <link rel="canonical" href={canonical} />
+    <link rel="sitemap" href="/sitemap.xml" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#050506" />
 
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="es_CO" />
-    <meta property="og:site_name" content="nmdenlaweb" />
+    <meta property="og:locale:alternate" content="es_US" />
+    <meta property="og:site_name" content={STUDIO_NAME} />
+    <meta property="og:url" content={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="nmdenlaweb · Hagamos que tus clientes te encuentren más fácil" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -40,6 +132,8 @@ const {
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
+
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
   <body class="bg-ink">
     <slot />

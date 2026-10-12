@@ -409,6 +409,49 @@
     animation: fade-up-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
+  .faq-item {
+    border-radius: 1rem;
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+    transition: border-color 0.2s ease;
+  }
+
+  .faq-item[open],
+  .faq-item:hover {
+    border-color: rgba(185, 84, 255, 0.4);
+  }
+
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-item summary:focus-visible {
+    outline: 2px solid var(--color-neon);
+    outline-offset: 2px;
+    border-radius: 1rem;
+  }
+
+  .faq-toggle {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(185, 84, 255, 0.4);
+    color: var(--color-neon);
+    transition:
+      transform 0.25s ease,
+      background 0.25s ease,
+      color 0.25s ease;
+  }
+
+  .faq-item[open] .faq-toggle {
+    transform: rotate(45deg);
+    background: var(--color-neon);
+    color: #fff;
+  }
+
   .project-card {
     display: block;
     overflow: hidden;
