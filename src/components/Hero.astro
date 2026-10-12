@@ -1,23 +1,5 @@
 ---
 import Icon from "./Icon.astro";
-
-const BENEFITS = [
-  {
-    icon: "sparkles" as const,
-    title: "Visible para las IAs",
-    text: "Preparamos tu negocio para aparecer cuando alguien le pregunta a <b>ChatGPT o Gemini</b> por lo que vendes.",
-  },
-  {
-    icon: "mapPin" as const,
-    title: "Arriba en Google y en Maps",
-    text: "Posicionamos tu web y tu perfil para que te encuentren <b>antes que a tu competencia</b> y <b>más clientes cercanos</b> te llamen.",
-  },
-  {
-    icon: "devices" as const,
-    title: "Una web rápida en cualquier pantalla",
-    text: "Tu página <b>carga en segundos</b> y se ve bien en celular, tablet y computador.",
-  },
-];
 ---
 
 <section id="top" class="slide relative flex min-h-screen flex-col overflow-x-clip bg-grid">
@@ -34,8 +16,8 @@ const BENEFITS = [
   >
   </div>
 
-  <div class="relative mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-8 px-4 pt-20 pb-8 text-center sm:px-6 md:gap-10 md:pt-24 md:pb-10 md:px-10">
-    <div class="flex flex-col items-center gap-4 md:gap-6">
+  <div class="relative mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-4 pt-24 pb-16 text-center sm:px-6 md:px-10 md:pt-28 md:pb-20">
+    <div class="flex flex-col items-center gap-5 md:gap-7">
       <span class="hero-chip animate-fade-up">
         <span class="hero-chip-check" aria-hidden="true">
           <Icon name="check" class="h-3 w-3 md:h-3.5 md:w-3.5" />
@@ -57,11 +39,11 @@ const BENEFITS = [
         </span>
       </span>
 
-      <h1 class="animate-fade-up font-display max-w-[18ch] text-balance text-[2rem] font-bold leading-[1] tracking-[-0.035em] text-white [animation-delay:90ms] sm:text-5xl md:text-6xl lg:text-[4.5rem]">
+      <h1 class="animate-fade-up font-display max-w-[18ch] text-balance text-[2.25rem] font-bold leading-[1] tracking-[-0.035em] text-white [animation-delay:90ms] sm:text-5xl md:text-7xl lg:text-[5.25rem]">
         Hagamos que tus clientes te encuentren <span class="text-gradient">más fácil</span>
       </h1>
 
-      <p class="animate-fade-up text-base text-muted [animation-delay:180ms] md:text-xl">
+      <p class="animate-fade-up text-base text-muted [animation-delay:180ms] md:text-2xl">
         En las IAs, en buscadores y en mapas.
       </p>
 
@@ -73,21 +55,5 @@ const BENEFITS = [
         <Icon name="arrowRight" />
       </a>
     </div>
-
-    <ul class="animate-fade-up grid w-full max-w-5xl grid-cols-1 gap-x-8 text-left [animation-delay:360ms] md:grid-cols-3">
-      {
-        BENEFITS.map((item) => (
-          <li class="group flex items-start gap-4 border-t border-line py-4 md:py-5">
-            <div class="benefit-tile">
-              <Icon name={item.icon} class="icon-neon h-5 w-5 md:h-6 md:w-6" />
-            </div>
-            <div class="min-w-0">
-              <h2 class="font-display text-base font-semibold leading-snug text-white md:text-lg">{item.title}</h2>
-              <p class="mt-1 text-sm leading-relaxed text-muted md:text-[0.9375rem] [&_b]:font-medium [&_b]:text-white" set:html={item.text} />
-            </div>
-          </li>
-        ))
-      }
-    </ul>
   </div>
 </section>

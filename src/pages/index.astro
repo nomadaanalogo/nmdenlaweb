@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import Nav from "../components/Nav.astro";
 import SlideDots from "../components/SlideDots.astro";
 import Hero from "../components/Hero.astro";
+import Servicios from "../components/Servicios.astro";
 import Diagnostico from "../components/Diagnostico.astro";
 import Portfolio from "../components/Portfolio.astro";
 import Faq from "../components/Faq.astro";
@@ -11,6 +12,7 @@ import WhatsAppFloat from "../components/WhatsAppFloat.astro";
 
 const SLIDES = [
   { id: "top", label: "Inicio" },
+  { id: "servicios", label: "Servicios" },
   { id: "diagnostico", label: "Propuesta" },
   { id: "portafolio", label: "Proyectos" },
   { id: "preguntas", label: "Preguntas" },
@@ -23,6 +25,7 @@ const SLIDES = [
   <SlideDots slides={SLIDES} />
   <main id="slides-track">
     <Hero />
+    <Servicios />
     <Diagnostico />
     <Portfolio />
     <Faq />
