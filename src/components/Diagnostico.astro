@@ -187,6 +187,9 @@ const TOTAL = QUESTIONS.length + 2;
     const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
     let current = 0;
 
+    // Trampa de tiempo: los bots llenan todo en milisegundos.
+    const startedAt = Date.now();
+
     const show = (index: number) => {
       current = index;
       steps.forEach((step, i) => (step.hidden = i !== index));
@@ -257,7 +260,11 @@ const TOTAL = QUESTIONS.length + 2;
           const res = await fetch(endpoint, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ ...answers, website: String(data.get("website") ?? "") }),
+            body: JSON.stringify({
+              ...answers,
+              website: String(data.get("website") ?? ""),
+              elapsed: Date.now() - startedAt,
+            }),
           });
           const result = await res.json().catch(() => null);
           if (!res.ok || !result?.ok) throw new Error(result?.error ?? "Envío fallido");
@@ -277,8 +284,11 @@ const TOTAL = QUESTIONS.length + 2;
         if (progressWrap) progressWrap.hidden = true;
         if (back) back.hidden = true;
         if (done) done.hidden = false;
-      } catch {
-        showError("No pudimos enviar tus datos. Intenta de nuevo en un momento.");
+      } catch (err) {
+        const msg = err instanceof Error && err.message.includes("Demasiadas")
+          ? err.message
+          : "No pudimos enviar tus datos. Intenta de nuevo en un momento.";
+        showError(msg);
       } finally {
         if (submit) submit.disabled = false;
       }

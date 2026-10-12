@@ -18,6 +18,11 @@ const CONFIG = {
   // Indicativo que se agrega a los números de 10 dígitos que escriben los clientes.
   COUNTRY_CODE: "57",
   SHEET_NAME: "Solicitudes",
+  // Anti-bots
+  MIN_FILL_MS: 4000, // Envíos más rápidos que esto se descartan.
+  MAX_PER_HOUR: 30, // Máximo de solicitudes aceptadas por hora en total.
+  REPEAT_WINDOW_SECONDS: 600, // Mismo correo/WhatsApp: 1 envío cada 10 minutos.
+  MAIL_QUOTA_RESERVE: 10, // Correos diarios reservados para los avisos a nmdenlaweb@gmail.com.
 };
 
 const HEADERS = [
@@ -36,21 +41,31 @@ const HEADERS = [
 
 function doPost(e) {
   const lock = LockService.getScriptLock();
-  lock.waitLock(10000);
 
   try {
+    lock.waitLock(10000);
     const data = JSON.parse((e && e.postData && e.postData.contents) || "{}");
 
-    // Campo trampa: si viene lleno es un bot. Respondemos ok para no darle pistas.
+    // ---------- Anti-bots ----------
+    // 1. Campo trampa: si viene lleno es un bot. Respondemos ok para no darle pistas.
     if (data.website) return jsonResponse({ ok: true });
 
+    // 2. Trampa de tiempo: una persona tarda varios segundos en responder 5 pasos.
+    // (Si no viene el tiempo, también se descarta: Number(undefined) es NaN.)
+    if (!(Number(data.elapsed) >= CONFIG.MIN_FILL_MS)) return jsonResponse({ ok: true });
+
+    // 3. Límite global por hora, para frenar ataques masivos.
+    if (!underGlobalLimit()) {
+      return jsonResponse({ ok: false, error: "Demasiadas solicitudes en este momento. Intenta en unos minutos." });
+    }
+
     const lead = {
-      nombre: clean(data.nombre, 120),
-      whatsapp: clean(data.whatsapp, 30),
-      correo: clean(data.correo, 160).toLowerCase(),
-      web: clean(data.web, 120),
-      maps: clean(data.maps, 120),
-      local: clean(data.local, 120),
+      nombre: cleanLine(data.nombre, 80),
+      whatsapp: cleanLine(data.whatsapp, 30),
+      correo: cleanLine(data.correo, 160).toLowerCase(),
+      web: cleanLine(data.web, 120),
+      maps: cleanLine(data.maps, 120),
+      local: cleanLine(data.local, 120),
       negocio: clean(data.negocio, 2000),
     };
 
@@ -61,11 +76,19 @@ function doPost(e) {
       return jsonResponse({ ok: false, error: "El correo no es válido." });
     }
 
+    // Un nombre con enlaces es spam: así evitamos que usen el correo automático para mandar links.
+    if (/https?:|www\.|:\/\/|\.(com|net|org|ru|xyz|top)\b/i.test(lead.nombre)) {
+      return jsonResponse({ ok: true });
+    }
+
+    // 4. Un mismo correo o WhatsApp solo una vez cada 10 minutos (evita duplicados y spam repetido).
+    if (isRepeated(lead)) return jsonResponse({ ok: true });
+
     saveLead(lead);
 
     // Los correos no deben impedir que la solicitud quede guardada.
     try {
-      sendAutoReply(lead);
+      if (MailApp.getRemainingDailyQuota() > CONFIG.MAIL_QUOTA_RESERVE) sendAutoReply(lead);
     } catch (err) {
       console.error("Error enviando respuesta automática", err);
     }
@@ -154,7 +177,6 @@ function sendAutoReply(lead) {
           ${summaryRow("Página web", lead.web)}
           ${summaryRow("Google Maps", lead.maps)}
           ${summaryRow("Tu negocio es", lead.local)}
-          ${summaryRow("Sobre tu negocio", lead.negocio)}
         </div>
 
         <p style="margin:0 0 20px;font-size:16px;line-height:1.6;color:#3f3f46;">¿Quieres adelantar la conversación?</p>
@@ -221,6 +243,25 @@ function notifyStudio(lead) {
   });
 }
 
+// ---------- Anti-bots ----------
+
+function underGlobalLimit() {
+  const cache = CacheService.getScriptCache();
+  const key = "count-" + Utilities.formatDate(new Date(), "UTC", "yyyyMMddHH");
+  const count = Number(cache.get(key) || 0);
+  if (count >= CONFIG.MAX_PER_HOUR) return false;
+  cache.put(key, String(count + 1), 3600);
+  return true;
+}
+
+function isRepeated(lead) {
+  const cache = CacheService.getScriptCache();
+  const keys = ["mail-" + lead.correo, "wa-" + lead.whatsapp.replace(/\D/g, "")];
+  if (keys.some((k) => cache.get(k))) return true;
+  keys.forEach((k) => cache.put(k, "1", CONFIG.REPEAT_WINDOW_SECONDS));
+  return false;
+}
+
 // ---------- Utilidades ----------
 
 function summaryRow(label, value) {
@@ -229,12 +270,21 @@ function summaryRow(label, value) {
 }
 
 function clean(value, maxLength) {
-  return String(value || "").trim().slice(0, maxLength);
+  // Quita caracteres de control (deja saltos de línea y tabs para el texto libre).
+  return String(value || "")
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
+    .trim()
+    .slice(0, maxLength);
 }
 
-// Evita que un texto que empieza por = + - @ se ejecute como fórmula en Sheets.
+// Para campos de una sola línea: sin saltos de línea (evita inyección en el asunto del correo).
+function cleanLine(value, maxLength) {
+  return clean(String(value || "").replace(/\s+/g, " "), maxLength);
+}
+
+// Evita que un texto que empieza por = + - @ (o tab/retorno) se ejecute como fórmula en Sheets.
 function safeCell(value) {
-  return /^[=+\-@]/.test(value) ? "'" + value : value;
+  return /^[=+\-@\t\r]/.test(value) ? "'" + value : value;
 }
 
 function escapeHtml(value) {
@@ -265,6 +315,7 @@ function probarFormulario() {
         maps: "Sí, pero no estoy posicionado",
         local: "Local físico",
         negocio: "Esto es una prueba del formulario.",
+        elapsed: 60000,
       }),
     },
   };

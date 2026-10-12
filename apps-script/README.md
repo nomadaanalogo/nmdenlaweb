@@ -27,6 +27,20 @@ Hazlo con la cuenta **nmdenlaweb@gmail.com**, porque los correos salen desde la 
 
 Para comprobar que quedó publicada, abre la URL `/exec` en el navegador. Debe decir *"nmdenlaweb · formulario activo ✔"*.
 
+## Protección contra bots
+
+El formulario tiene 4 filtros:
+
+| Filtro | Qué hace |
+|---|---|
+| Campo trampa | Un campo invisible que solo llenan los bots. Se descarta en silencio. |
+| Trampa de tiempo | Si alguien completa todo en menos de 4 segundos, se descarta en silencio. |
+| Límite por hora | Máximo 30 solicitudes por hora en total (`MAX_PER_HOUR`). |
+| Repetidos | El mismo correo o WhatsApp solo se acepta una vez cada 10 minutos. |
+
+
+Nota: si ejecutas `probarFormulario` dos veces seguidas, la segunda no guarda fila por el filtro de repetidos (mismo correo en menos de 10 minutos).
+
 ## Si cambias el código después
 
 Cada cambio en `Code.gs` necesita una nueva versión: **Implementar → Administrar implementaciones → ✏️ Editar → Versión: Nueva versión → Implementar**. Así la URL `/exec` sigue siendo la misma.
