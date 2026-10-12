@@ -14,7 +14,7 @@ const CONFIG = {
   STUDIO_NAME: "nmdenlaweb",
   NOTIFY_EMAIL: "nmdenlaweb@gmail.com",
   // Número de WhatsApp del estudio, formato internacional sin "+" (ej: 573001234567).
-  STUDIO_WHATSAPP: "00000000000",
+  STUDIO_WHATSAPP: "573154483584",
   // Indicativo que se agrega a los números de 10 dígitos que escriben los clientes.
   COUNTRY_CODE: "57",
   SHEET_NAME: "Solicitudes",
